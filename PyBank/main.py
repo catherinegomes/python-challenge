@@ -5,7 +5,7 @@ file_to_output=os.path.join("Analysis","budget_analysis.txt")
 
 total_months=0
 prev_revenue=0
-total_revenue=0
+net_revenue=0
 month_of_change=[]
 revenue_change_list=[]
 greatest_inc=["",0]
@@ -17,7 +17,7 @@ with open(file_to_load) as revenue_data:
 
     for row in reader:
         total_months=total_months+1
-        total_revenue=int(row["Profit/Losses"])
+        net_revenue=int(row["Profit/Losses"])
 
         revenue_change=int(row["Profit/Losses"])-prev_revenue
         prev_revenue=int(row["Profit/Losses"])
@@ -39,10 +39,10 @@ output=(
     f"\nFinancial Analysis\n"
     f"-------------------------\n"
     f"Total Months: {total_months}\n"
-    f"Total Revenue: {total_revenue}\n"
-    f"Average Revenue Change: {revenue_average}\n"
-    f"Greatest Increase in Rev: {greatest_inc[0]} ${greatest_inc[1]}\n"
-    f"Greatest Decrease in Rev: {greatest_dec[0]} ${greatest_dec[1]}\n"
+    f"Total: {net_revenue}\n"
+    f"Average Change: {revenue_average}\n"
+    f"Greatest Increase in Profits: {greatest_inc[0]} ${greatest_inc[1]}\n"
+    f"Greatest Decrease in Profits: {greatest_dec[0]} ${greatest_dec[1]}\n"
 )
 print(output)
 
