@@ -1,4 +1,4 @@
-import csv, os
+import csv, os, collections
 
 file_to_load=os.path.join("Resources","budget_data.csv")
 file_to_output=os.path.join("Analysis","budget_analysis.txt")
@@ -6,34 +6,37 @@ file_to_output=os.path.join("Analysis","budget_analysis.txt")
 total_months=0
 prev_revenue=0
 net_revenue=0
-month_of_change=[]
-revenue_change_list=[]
-greatest_inc=["",0]
-greatest_dec=["",99999999999]
+revenue_change_list = []
+
 
 
 with open(file_to_load) as revenue_data:
-    reader = csv.DictReader(revenue_data)
+    reader = csv.reader(revenue_data)
+    reader = collections.OrderedDict(reader)
+    data = list(reader.items())
 
-    for row in reader:
-        total_months=total_months+1
-        net_revenue=int(row["Profit/Losses"])
+del data[0]
 
-        revenue_change=int(row["Profit/Losses"])-prev_revenue
-        prev_revenue=int(row["Profit/Losses"])
-        revenue_change_list=revenue_change_list+[revenue_change]
-        month_of_change=month_of_change+[row["Date"]]
+tmp = []
+revenue_change_list = []
 
-# in order to capture the greatest inc/de-crease, update the variable according to the condition set forth
-        if revenue_change>greatest_inc[1]:
-            greatest_inc[0]=row["Date"]
-            greatest_inc[1]=revenue_change
+for i in data:
+    total_months = total_months + 1
+    net_revenue = net_revenue + int(i[1])
+    tmp.append(i[1])
 
-        if revenue_change<greatest_dec[1]:
-            greatest_dec[0]=row["Date"]
-            greatest_dec[1]=revenue_change
+revenue_data = [int(y) - int(x) for x,y in zip(tmp,tmp[1:])]
+revenue_change_list.extend(revenue_data)
 
-revenue_average=sum(revenue_change_list)/len(revenue_change_list)
+revenue_average = sum(revenue_change_list)/len(revenue_change_list)
+
+revenue_change_list.insert(0, 0)
+# Find the greatest increase (aka maximum) and greatest decrease (aka minimum)
+greatest_increase = max(revenue_change_list)
+greatest_decrease = min(revenue_change_list)
+
+max_index = [i for i, j in enumerate(revenue_change_list) if j == greatest_increase]
+min_index = [i for i, j in enumerate(revenue_change_list) if j == greatest_decrease]
 
 output=(
     f"\nFinancial Analysis\n"
@@ -41,8 +44,8 @@ output=(
     f"Total Months: {total_months}\n"
     f"Total: {net_revenue}\n"
     f"Average Change: {revenue_average}\n"
-    f"Greatest Increase in Profits: {greatest_inc[0]} ${greatest_inc[1]}\n"
-    f"Greatest Decrease in Profits: {greatest_dec[0]} ${greatest_dec[1]}\n"
+    f"Greatest Increase in Profits: " + data[max_index[0]][0] + " ($" + str(revenue_change_list[max_index[0]]) +")\n"
+    f"Greatest Decrease in Profits: " + data[min_index[0]][0] + " ($" + str(revenue_change_list[min_index[0]])  +")\n"
 )
 print(output)
 
